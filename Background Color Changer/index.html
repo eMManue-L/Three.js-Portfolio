@@ -1,11 +1,210 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-	<title>Color Changer</title>
-	<link rel="stylesheet" type="text/css" href="style.css">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🌈 Chroma Flipper | CSS Art</title>
+    <style>
+        :root {
+            --primary-bg: #121212;
+            --text-color: #f0f0f0;
+            --accent: #ff6b6b;
+            --transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+        
+        body {
+            margin: 0;
+            height: 100vh;
+            display: grid;
+            place-items: center;
+            background: var(--primary-bg);
+            color: var(--text-color);
+            font-family: 'Poppins', system-ui, sans-serif;
+            overflow: hidden;
+            transition: var(--transition);
+        }
+        
+        .hero {
+            text-align: center;
+            max-width: 600px;
+            padding: 2rem;
+        }
+        
+        h1 {
+            font-size: clamp(2rem, 5vw, 3.5rem);
+            margin-bottom: 1.5rem;
+            background: linear-gradient(45deg, #ff9a9e, #fad0c4, #fbc2eb, #a6c1ee);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            animation: gradientShift 8s ease infinite;
+            background-size: 300% 300%;
+        }
+        
+        .color-display {
+            font-size: 1.8rem;
+            margin: 2rem 0;
+            font-weight: bold;
+            text-shadow: 0 2px 10px rgba(0,0,0,0.2);
+        }
+        
+        .btn {
+            position: relative;
+            background: transparent;
+            color: var(--text-color);
+            border: 2px solid var(--accent);
+            padding: 1rem 2.5rem;
+            font-size: 1.2rem;
+            font-weight: 600;
+            border-radius: 50px;
+            cursor: pointer;
+            overflow: hidden;
+            z-index: 1;
+            transition: var(--transition);
+        }
+        
+        .btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: var(--accent);
+            z-index: -1;
+            transform: scaleX(0);
+            transform-origin: right;
+            transition: transform 0.4s ease;
+        }
+        
+        .btn:hover {
+            color: #121212;
+            box-shadow: 0 0 25px rgba(255, 107, 107, 0.5);
+        }
+        
+        .btn:hover::before {
+            transform: scaleX(1);
+            transform-origin: left;
+        }
+        
+        .btn:active {
+            transform: scale(0.95);
+        }
+        
+        .particles {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: -1;
+        }
+        
+        @keyframes gradientShift {
+            0% { background-position: 0% 50% }
+            50% { background-position: 100% 50% }
+            100% { background-position: 0% 50% }
+        }
+        
+        footer {
+            position: absolute;
+            bottom: 1rem;
+            width: 100%;
+            text-align: center;
+            opacity: 0.7;
+            font-size: 0.9rem;
+        }
+    </style>
 </head>
 <body>
-	<button>CHANGE</button>
-	<script type="text/javascript" src="script.js"></script>
+    <div class="particles" id="particles"></div>
+    
+    <div class="hero">
+        <h1>Chroma Flipper</h1>
+        <div class="color-display" id="colorDisplay">#121212</div>
+        <button class="btn" id="colorBtn">FLIP COLORS</button>
+    </div>
+    
+    <footer>
+        Click to transform your world • Made with CSS magic
+    </footer>
+
+    <script>
+        const btn = document.getElementById('colorBtn');
+        const colorDisplay = document.getElementById('colorDisplay');
+        const particles = document.getElementById('particles');
+        
+        const colors = [
+            '#FF9AA2', '#FFB7B2', '#FFDAC1', '#E2F0CB', 
+            '#B5EAD7', '#C7CEEA', '#F8B195', '#F67280',
+            '#C06C84', '#6C5B7B', '#355C7D', '#A8E6CE',
+            '#DCEDC2', '#FFD3B5', '#FFAAA6', '#FF8C94'
+        ];
+        
+        btn.addEventListener('click', () => {
+            // Generate random color
+            const randomColor = colors[Math.floor(Math.random() * colors.length)];
+            document.body.style.backgroundColor = randomColor;
+            colorDisplay.textContent = randomColor;
+            
+            // Create particles
+            createParticles(randomColor);
+            
+            // Change button border color
+            btn.style.setProperty('--accent', lightenColor(randomColor, 20));
+            
+            // Change text color for contrast
+            document.body.style.color = getContrastYIQ(randomColor);
+        });
+        
+        function createParticles(color) {
+            // Clear previous particles
+            particles.innerHTML = '';
+            
+            // Create new particles
+            for (let i = 0; i < 30; i++) {
+                const particle = document.createElement('div');
+                particle.style.position = 'absolute';
+                particle.style.width = `${Math.random() * 15 + 5}px`;
+                particle.style.height = particle.style.width;
+                particle.style.backgroundColor = color;
+                particle.style.borderRadius = '50%';
+                particle.style.top = `${Math.random() * 100}vh`;
+                particle.style.left = `${Math.random() * 100}vw`;
+                particle.style.opacity = Math.random();
+                particle.style.animation = `float ${Math.random() * 3 + 2}s linear infinite`;
+                
+                // Add animation
+                document.styleSheets[0].insertRule(`
+                    @keyframes float {
+                        0% { transform: translate(0, 0) rotate(0deg); opacity: ${Math.random()}; }
+                        100% { transform: translate(${Math.random() * 200 - 100}px, ${Math.random() * 200 - 100}px) rotate(${Math.random() * 360}deg); opacity: 0; }
+                    }
+                `, document.styleSheets[0].cssRules.length);
+                
+                particles.appendChild(particle);
+            }
+        }
+        
+        // Helper functions
+        function lightenColor(color, percent) {
+            const num = parseInt(color.replace('#', ''), 16);
+            const amt = Math.round(2.55 * percent);
+            const R = (num >> 16) + amt;
+            const G = (num >> 8 & 0x00FF) + amt;
+            const B = (num & 0x0000FF) + amt;
+            return `#${(0x1000000 + (R<255?R<1?0:R:255)*0x10000 + (G<255?G<1?0:G:255)*0x100 + (B<255?B<1?0:B:255)).toString(16).slice(1)}`;
+        }
+        
+        function getContrastYIQ(hexcolor){
+            hexcolor = hexcolor.replace('#', '');
+            const r = parseInt(hexcolor.substr(0,2), 16);
+            const g = parseInt(hexcolor.substr(2,2), 16);
+            const b = parseInt(hexcolor.substr(4,2), 16);
+            const yiq = ((r*299)+(g*587)+(b*114))/1000;
+            return (yiq >= 128) ? '#121212' : '#f8f8f8';
+        }
+    </script>
 </body>
 </html>
